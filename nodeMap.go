@@ -28,10 +28,6 @@ func (y *nodeMap) delete(x nodeName) {
 	}
 }
 
-// func (y *nodeMap) isEmpty() bool {
-// 	return len(y.m) > 0
-// }
-
 func (y *nodeMap) getFirst() (nodeName, bool) {
 	if y.cachedFirstValid {
 		return y.cachedFirst, true
