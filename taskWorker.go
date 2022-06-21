@@ -30,6 +30,7 @@ func taskWorker(ctx context.Context, taskData, taskDone chan nodeName, taskResul
 			return
 		case node_name := <-taskData:
 			data, err := taskWorkerUrlFunction(node_name, uc.Config.HostRequestTimeoutSeconds)
+			defer (*data).Close()
 			if err != nil {
 				errCh <- errorData{err, node_name}
 			} else {
