@@ -24,7 +24,6 @@ func taskWorkerDefaultUrlFunction(node_name nodeName, timeout int) (*io.ReadClos
 var taskWorkerUrlFunction func(node_name nodeName, timeout int) (*io.ReadCloser, error) = taskWorkerDefaultUrlFunction
 
 func taskWorker(ctx context.Context, taskData, taskDone chan nodeName, taskResult chan [2]nodeName, errCh chan errorData, uc *UrlCrawler) {
-	var bufferOveflow = false
 	for {
 		select {
 		case <-ctx.Done():
@@ -44,13 +43,11 @@ func taskWorker(ctx context.Context, taskData, taskDone chan nodeName, taskResul
 						}
 						break
 					}
-					if uc.Config.OutputErrorsToConsole {
-						if !bufferOveflow {
-							if buffer.Len()+n > uc.Config.NodeBodyReadBufferMaxBytes {
-								bufferOveflow = true
-								log.Println("Node body read buffer overflow at", node_name)
-							}
+					if buffer.Len()+n > uc.Config.NodeBodyReadBufferMaxBytes {
+						if uc.Config.OutputErrorsToConsole {
+							log.Println("Node body read buffer overflow at", node_name)
 						}
+						break
 					}
 					buffer.Write(b)
 				}
