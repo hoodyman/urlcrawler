@@ -51,6 +51,7 @@ func taskWorker(ctx context.Context, taskData, taskDone chan nodeName, taskResul
 					}
 					buffer.Write(b)
 				}
+				// (*data).Close()
 				str := buffer.String()
 				res := uc.regexpUrlCompiled.FindAllString(str, -1)
 				for _, v1 := range res {
