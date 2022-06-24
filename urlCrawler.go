@@ -114,8 +114,6 @@ func NewUrlCrawler(config *Config) UrlCrawler {
 
 func (y *UrlCrawler) ProcessDeep() error {
 
-	feeds := 0
-
 	y.name_mapper = newNameMapper(y.Config.NodeNameCacheSize)
 	y.NodeEdgeArray = nodeEdgeMap{}
 
@@ -168,10 +166,9 @@ func (y *UrlCrawler) ProcessDeep() error {
 				curNodesVal := y.name_mapper.len()
 				curEdgesVal := len(y.NodeEdgeArray)
 				if curNodesVal != lastNodesVal || curEdgesVal != lastEdgesVal {
-					fmt.Printf("%v nodes, %v edges, %v feeds\n", curNodesVal, curEdgesVal, feeds)
+					fmt.Printf("%v nodes, %v edges\n", curNodesVal, curEdgesVal)
 					lastNodesVal = curNodesVal
 					lastEdgesVal = curEdgesVal
-					feeds = 0
 				}
 			}
 			tick := func() {
@@ -256,7 +253,6 @@ func (y *UrlCrawler) ProcessDeep() error {
 					var feed = false
 					select {
 					case taskData <- name:
-						feeds++
 						inProcess.append(name)
 						inQueue.delete(name)
 						feed = true
