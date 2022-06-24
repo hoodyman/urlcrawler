@@ -10,34 +10,37 @@ import (
 	"time"
 )
 
-const DefaultStartingNode = "github.com"
-const DefaultMaxThreads = 100
-const DefaultMaxCrawLevel = 1000
-const DefaultProcessingTimeoutSeconds = 60
-const DefaultHostRequestTimeoutSeconds = 5
-const DefaultOutputErrorsToConsole = true
-const DefaultOutputFileName = "output.dot"
-const DefaultOutputNewEdgeToConsole = true
-const DefaultOutputNewEdgeToFile = false
-const DefaultOutputWithErrorFileName = "outputWithError.txt"
-const DefaultOutputNodeWithErrorToFile = false
-const DefaultOutputNodeWithErrorToConsole = true
-const DefaultMaxQueuedNames = 100000
-const DefaultMaxProcessedNames = 100000
-const DefaultMaxNodeEdges = 20000
-const DefaultNameCacheSize = 100
-const DefaultNodeBodyReadBufferMaxBytes = 1024 * 1024 * 100
-const DefaultRegexpUrlCompiled = `https?://(\w+\.)+\w+`
-const DefaultRegexpHttpReplCompiled = `https?://`
-const DefaultStatOutputToConsole = true
+const (
+	DefaultStartingNode                 = "github.com"
+	DefaultMaxThreads                   = 100
+	DefaultMaxCrawLevel                 = 1000
+	DefaultProcessingTimeoutSeconds     = 60
+	DefaultHostRequestTimeoutSeconds    = 5
+	DefaultOutputErrorsToConsole        = true
+	DefaultOutputFileName               = "output.dot"
+	DefaultOutputNewEdgeToConsole       = true
+	DefaultOutputNewEdgeToFile          = false
+	DefaultOutputWithErrorFileName      = "outputWithError.txt"
+	DefaultOutputNodeWithErrorToFile    = false
+	DefaultOutputNodeWithErrorToConsole = true
+	DefaultMaxQueuedNames               = 100000
+	DefaultMaxProcessedNames            = 100000
+	DefaultMaxNodeEdges                 = 20000
+	DefaultNameCacheSize                = 100
+	DefaultNodeBodyReadBufferMaxBytes   = 1024 * 1024 * 100
+	DefaultRegexpUrlCompiled            = `https?://(\w+\.)+\w+`
+	DefaultRegexpHttpReplCompiled       = `https?://`
+	DefaultStatOutputToConsole          = true
+)
 
-const divider = "--"
-
-var ErrMaximumProcessedNamesReached = errors.New("maximum processed urls reached")
-var ErrMaximumQueuedNamesReached = errors.New("maximum queued urls reached")
-var ErrProcessTimedOut = errors.New("process timed out")
-var ErrMaximumCrawLevelReached = errors.New("maximum craw level reached")
-var ErrMaximumNodeEdgesReached = errors.New("maximum node edges reached")
+var (
+	ErrMaximumProcessedNamesReached = errors.New("maximum processed urls reached")
+	ErrMaximumQueuedNamesReached    = errors.New("maximum queued urls reached")
+	ErrProcessTimedOut              = errors.New("process timed out")
+	ErrMaximumCrawLevelReached      = errors.New("maximum craw level reached")
+	ErrMaximumNodeEdgesReached      = errors.New("maximum node edges reached")
+	ErrNodeNameNotFound             = errors.New("no such node idx")
+)
 
 type Config struct {
 	StartingNode                 string
@@ -130,8 +133,6 @@ func (y *UrlCrawler) ProcessDeep() error {
 		if err != nil {
 			log.Fatal(err)
 		}
-		outputFileHandle.WriteString("graph G {\n")
-		defer outputFileHandle.WriteString("}\n")
 	}
 
 	if y.Config.OutputNodeWithErrorToFile {
@@ -205,10 +206,10 @@ func (y *UrlCrawler) ProcessDeep() error {
 						isIn := y.NodeEdgeArray.append(newNodeEdge(name[0], name[1], y.name_mapper))
 						if !isIn {
 							if y.Config.OutputNewEdgeToConsole {
-								fmt.Println(name[0], divider, name[1])
+								fmt.Println(name[0], "--", name[1])
 							}
 							if y.Config.OutputNewEdgeToFile {
-								_, err := outputFileHandle.WriteString(fmt.Sprintf("\t\"%v\" %v \"%v\";\n", name[0], divider, name[1]))
+								_, err := outputFileHandle.WriteString(fmt.Sprintf("\t\"%v\" %v \"%v\";\n", name[0], "--", name[1]))
 								if err != nil {
 									log.Fatal(err)
 								}
@@ -279,8 +280,6 @@ func (y *UrlCrawler) GetNodeNameCacheSuccess() float64 {
 	}
 	return 0
 }
-
-var ErrNodeNameNotFound = errors.New("no such node idx")
 
 // for k, v := range x.NodeEdgeArray {
 // 	t, err := x.TranslateDataItem(k)

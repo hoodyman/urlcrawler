@@ -10,7 +10,7 @@ type nameMapperCache struct {
 	cacheMiss            float64
 	statsCoefficient     float64
 	statsCoefficientMult float64
-	supressCasheUpdate   bool
+	supressCacheUpdate   bool
 	cacheSize            int
 	cache                []cacheLine
 	currentAmount        int
@@ -36,7 +36,7 @@ func (y *nameMapperCache) reset() {
 	y.cacheMiss = 0
 	y.statsCoefficient = defaultStatsCoefficient
 	y.statsCoefficientMult = defaultStatsCoefficientMult
-	y.supressCasheUpdate = false
+	y.supressCacheUpdate = false
 	y.cache = make([]cacheLine, y.cacheSize)
 	y.currentAmount = 0
 }
@@ -44,7 +44,7 @@ func (y *nameMapperCache) reset() {
 func (y *nameMapperCache) getName(idx nodeIndex) (nodeName, bool) {
 	for i, v := range y.cache {
 		if i < y.currentAmount && v.index == idx {
-			if !y.supressCasheUpdate {
+			if !y.supressCacheUpdate {
 				if i > 0 {
 					y.cache[i], y.cache[i-1] = y.cache[i-1], y.cache[i]
 				}
@@ -54,7 +54,7 @@ func (y *nameMapperCache) getName(idx nodeIndex) (nodeName, bool) {
 			return v.name, true
 		}
 	}
-	if !y.supressCasheUpdate {
+	if !y.supressCacheUpdate {
 		y.cacheMiss += y.statsCoefficient
 		y.statsOverflowCheck()
 	}
@@ -82,8 +82,8 @@ func (y *nameMapperCache) getName(idx nodeIndex) (nodeName, bool) {
 // }
 
 func (y *nameMapperCache) putName(name nodeName, idx nodeIndex) {
-	y.supressCasheUpdate = true
-	defer func() { y.supressCasheUpdate = false }()
+	y.supressCacheUpdate = true
+	defer func() { y.supressCacheUpdate = false }()
 	if _, ok := y.getName(idx); ok {
 		return
 	}
