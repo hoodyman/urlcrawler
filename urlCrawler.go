@@ -193,33 +193,29 @@ func (y *UrlCrawler) ProcessDeep() error {
 			log.Println(ErrProcessTimedOut)
 			return ErrProcessTimedOut
 		case name := <-taskResult:
-			if !inProcess.isExist(name[1]) {
-				if !processed.isExist(name[1]) {
-					if !toProcess.isExist(name[1]) {
-						toProcess.append(name[1])
-						if len(toProcess.m) == y.Config.MaxQueuedNames {
-							if y.Config.OutputErrorsToConsole {
-								log.Println(ErrMaximumQueuedNamesReached)
-							}
-							return ErrMaximumQueuedNamesReached
-						}
-						isIn := y.NodeEdgeArray.append(newNodeEdge(name[0], name[1], y.name_mapper))
-						if !isIn {
-							if y.Config.OutputNewEdgeToConsole {
-								fmt.Println(name[0], "--", name[1])
-							}
-							if y.Config.OutputNewEdgeToFile {
-								_, err := outputFileHandle.WriteString(fmt.Sprintf("\t\"%v\" %v \"%v\";\n", name[0], "--", name[1]))
-								if err != nil {
-									log.Fatal(err)
-								}
-							}
-						}
-						if y.NodeEdgeArray.len() == y.Config.MaxNodeEdges {
-							log.Println(ErrMaximumNodeEdgesReached.Error())
-							return ErrMaximumNodeEdgesReached
+			if !inProcess.isExist(name[1]) && !processed.isExist(name[1]) && !toProcess.isExist(name[1]) {
+				toProcess.append(name[1])
+				if len(toProcess.m) == y.Config.MaxQueuedNames {
+					if y.Config.OutputErrorsToConsole {
+						log.Println(ErrMaximumQueuedNamesReached)
+					}
+					return ErrMaximumQueuedNamesReached
+				}
+				isIn := y.NodeEdgeArray.append(newNodeEdge(name[0], name[1], y.name_mapper))
+				if !isIn {
+					if y.Config.OutputNewEdgeToConsole {
+						fmt.Println(name[0], "--", name[1])
+					}
+					if y.Config.OutputNewEdgeToFile {
+						_, err := outputFileHandle.WriteString(fmt.Sprintf("\t\"%v\" %v \"%v\";\n", name[0], "--", name[1]))
+						if err != nil {
+							log.Fatal(err)
 						}
 					}
+				}
+				if y.NodeEdgeArray.len() == y.Config.MaxNodeEdges {
+					log.Println(ErrMaximumNodeEdgesReached.Error())
+					return ErrMaximumNodeEdgesReached
 				}
 			}
 		case name := <-taskDone:
