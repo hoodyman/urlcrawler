@@ -114,6 +114,8 @@ func NewUrlCrawler(config *Config) UrlCrawler {
 
 func (y *UrlCrawler) ProcessDeep() error {
 
+	feeds := 0
+
 	y.name_mapper = newNameMapper(y.Config.NodeNameCacheSize)
 	y.NodeEdgeArray = nodeEdgeMap{}
 
@@ -166,9 +168,10 @@ func (y *UrlCrawler) ProcessDeep() error {
 				curNodesVal := y.name_mapper.len()
 				curEdgesVal := len(y.NodeEdgeArray)
 				if curNodesVal != lastNodesVal || curEdgesVal != lastEdgesVal {
-					fmt.Printf("%v nodes, %v edges\n", curNodesVal, curEdgesVal)
+					fmt.Printf("%v nodes, %v edges, %v feeds\n", curNodesVal, curEdgesVal, feeds)
 					lastNodesVal = curNodesVal
 					lastEdgesVal = curEdgesVal
+					feeds = 0
 				}
 			}
 			tick := func() {
@@ -186,6 +189,8 @@ func (y *UrlCrawler) ProcessDeep() error {
 			tick()
 		}()
 	}
+
+	checkStateTick := time.NewTicker(time.Millisecond)
 
 	for {
 		select {
@@ -245,15 +250,26 @@ func (y *UrlCrawler) ProcessDeep() error {
 					log.Fatal(err2)
 				}
 			}
-		default:
-			if name, ok := inQueue.getFirst(); ok {
-				select {
-				case taskData <- name:
-					inProcess.append(name)
-					inQueue.delete(name)
-				default:
+		case <-checkStateTick.C:
+			for {
+				if name, ok := inQueue.getFirst(); ok {
+					var feed = false
+					select {
+					case taskData <- name:
+						feeds++
+						inProcess.append(name)
+						inQueue.delete(name)
+						feed = true
+					default:
+					}
+					if !feed {
+						break
+					}
+				} else {
+					break
 				}
-			} else if len(inProcess.m) > 0 {
+			}
+			if len(inProcess.m) > 0 {
 			} else if len(toProcess.m) > 0 {
 				crawLevel++
 				if crawLevel == y.Config.MaxCrawLevel {
