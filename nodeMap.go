@@ -14,10 +14,7 @@ func newNodeMap(nMapper *nameMapper) *nodeMap {
 
 func (y *nodeMap) append(x nodeName) {
 	y.cachedFirstValid = false
-	idx, ok := y.name_buffer.getIdx(x)
-	if !ok {
-		idx = y.name_buffer.append(x)
-	}
+	idx := y.name_buffer.getIdxOrAppend(x)
 	y.m[idx]++
 }
 

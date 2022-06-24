@@ -49,6 +49,13 @@ func (y *nameMapper) getName(x nodeIndex) (nodeName, bool) {
 	return "", false
 }
 
+func (y *nameMapper) getIdxOrAppend(x nodeName) nodeIndex {
+	if a, b := y.getIdx(x); b {
+		return a
+	}
+	return y.append(x)
+}
+
 func (y *nameMapper) getCacheSuccess() float64 {
 	return y.cache.getCacheSuccess()
 }
