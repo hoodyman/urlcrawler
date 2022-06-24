@@ -12,7 +12,7 @@ import (
 
 const (
 	DefaultStartingNode                 = "github.com"
-	DefaultMaxThreads                   = 100
+	DefaultMaxThreads                   = 512
 	DefaultMaxCrawLevel                 = 1000
 	DefaultProcessingTimeoutSeconds     = 60
 	DefaultHostRequestTimeoutSeconds    = 5
